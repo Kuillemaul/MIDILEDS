@@ -29,7 +29,7 @@ I have included another code that uses 1 strip divided into sections. This seeme
 
 Hardware i am using. 
 
-https://www.jaycar.com.au/midi-shield-for-arduino/p/XC4545 midi shield 
+https://www.jaycar.com.au/midi-shield-for-arduino/p/XC4545 midi shield (not the unit shown in the diagram) Would prefer to use a custome pcb to save space and to be able to select what serial it uses on the arduino. It currently uses serial1 so i cant monitor the serial on the PC for debugging. 
 https://www.jaycar.com.au/duinotech-mega-2560-r3-board-for-arduino/p/XC4420?pos=2&queryId=b9745df73d43f6552e6a536d3743c3b6&sort=relevance arduino Mega
 https://www.jaycar.com.au/5-19-5v-dc-45w-power-supply-7dc-plugs/p/MP3319?pos=2&queryId=342b5ef8b99f8ce7d3752a8b71f971df current power unit for the LEDS
 
