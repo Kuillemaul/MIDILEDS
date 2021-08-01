@@ -17,6 +17,17 @@
 #define button1Pin 5       //PAD CHANGE IN PLACE OF MIDI HIT
 #define modeButton 2       //CHANGE MODE Center Encoder Button
 //NUMBER OF LEDS PER MIDI DRUM
+
+#define TOM1LEDS 0
+#define TOM2LEDS 1
+#define TOM3LEDS 2
+#define SNARELEDS 3
+#define BASSLEDS 4
+#define HIHATLEDS 5
+#define CRASHLEDS 6
+#define RIDELEDS 7
+
+
 #define TOM1LEDS 34
 #define TOM2LEDS 34
 #define TOM3LEDS 34
@@ -25,7 +36,7 @@
 #define HIHATLEDS 30
 #define CRASHLEDS 37
 #define RIDELEDS 37
-#define NUM_LEDS 327  // TOTAL LEDS
+#define NUM_LEDS TOM1LEDS+TOM2LEDS+TOM3LEDS+SNARELEDS+BASSLEDS+HIHATLEDS+CRASHLEDS+RIDELEDS // TOTAL LEDS
 #define NUM_STRIPS  8  // TOTAL STRIPS
 
 // Encoder Settings
@@ -108,6 +119,15 @@ void setup() {
   controllers[6] = &FastLED.addLeds<WS2811, CRASHPIN, GRB>(crashstrip, CRASHLEDS);
   controllers[7] = &FastLED.addLeds<WS2811, RIDEPIN, GRB>(ridestrip, RIDELEDS);
 
+  leds[0] = &tom1strip[0];
+  leds[1] = &tom2strip[0];
+  leds[2] = &tom3strip[0];
+  leds[3] = &snarestrip[0];
+  leds[4] = &bassstrip[0];
+  leds[5] = &hihatstrip[0];
+  leds[6] = &crashstrip[0];
+  leds[7] = &ridestrip[0];
+
   attachInterrupt(digitalPinToInterrupt(modeButton), modechange, CHANGE); // Mode Change Interrupt
   attachInterrupt(digitalPinToInterrupt(button1Pin), padchange, CHANGE); // Mode Change Interrupt
   //pinMode(save, INPUT_PULLUP); //Pinmode for Encoder
@@ -162,10 +182,10 @@ void setup() {
   startMillis = millis();
 
   MIDI.setHandleNoteOn(MyHandleNoteOn); // Calls when not is on
-  MIDI.begin(10); // Initialize the Midi Library on channel 10
+  MIDI.begin(10); // Initialize the Midi Library on channel 10  
+  MIDI. turnThruOff();
 
 }
-
 // PATTERNS SETUP
 
 typedef void (*SimplePatternList[])();
@@ -180,21 +200,21 @@ void loop() {
 
   // CHECK IF AN EDIT MODE IS ENABLED
 
-  if (mode == 1) {
-    patterns();
+  if (mode > 0) {
+    switch(mode) {
+      case 1: 
+        patterns();
+        break;
+      case 2: 
+        coloredit();
+        break;
+      case 3: 
+        fade();
+        break;
+      default:
+        break;
+    }
   }
-
-  if (mode == 2) {
-    coloredit();
-  }
-  if (mode == 3) {
-    fade();
-  }
-  if (mode == 0) {
-
-
-  }
-
   /* THIS FADES THE LED STRIP */
   unsigned long currentTime = millis();
   if (currentTime - previousTime >=  setspeed) {
@@ -208,17 +228,8 @@ void loop() {
     fadeToBlackBy(crashstrip, CRASHLEDS, 1);
     fadeToBlackBy(ridestrip, RIDELEDS, 1);
 
-    controllers[0]->showLeds();
-    controllers[1]->showLeds();
-    controllers[2]->showLeds();
-    controllers[3]->showLeds();
-    controllers[4]->showLeds();
-    controllers[5]->showLeds();
-    controllers[6]->showLeds();
-    controllers[7]->showLeds();
   }
-
-
- 
-  
+  for (int i = 0; i < NUM_STRIPS; i++) {
+    controllers[i]->showLeds();
+  }  
 }
