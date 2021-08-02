@@ -78,7 +78,7 @@ unsigned long startMillis = millis();
 
 //Drum Defaults
 
-uint16_t fadeSpeed = 1;   // FADE SPEED
+uint16_t fadeSpeed = 10;   // FADE SPEED
 // EVERY_N_MILLISECONDS is a macro and can not actually take a variable.
 // A value of 1 is every millisecond. With persistence of vision
 // anything over 100Hz (10 milliseconds could be a bit much).
