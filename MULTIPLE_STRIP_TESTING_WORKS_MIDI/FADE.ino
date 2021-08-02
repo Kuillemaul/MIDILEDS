@@ -30,7 +30,9 @@ void fade() {
     fadeToBlackBy(hihatstrip, HIHATLEDS, 1);
     fadeToBlackBy(crashstrip, CRASHLEDS, 1);
     fadeToBlackBy(ridestrip, RIDELEDS, 1);
-
+for (int i = 0; i < NUM_STRIPS; i++) {
+    FastLED[i].showLeds();  //Show Leds fading?
+  }  
   }
 
 
@@ -41,34 +43,42 @@ void fade() {
       case 1:
         setspeed = newPos;
         tom1led ();
+        FastLED[3].showLeds(255);
         break;
       case 2:
         setspeed = newPos;
         tom2led ();
+        FastLED[4].showLeds(255);
         break;
       case 3:
         setspeed = newPos;
         tom3led ();
+        FastLED[5].showLeds(255);
         break;
       case 4:
         setspeed = newPos;
         snareled ();
+        FastLED[6].showLeds(255);
         break;
       case 5:
         setspeed = newPos;
         bassled ();
+        FastLED[7].showLeds(255);
         break;
       case 6:
         setspeed = newPos;
         hihatled ();
+        FastLED[0].showLeds(255);
         break;
       case 7:
         setspeed = newPos;
         crashled ();
+        FastLED[1].showLeds(255);
         break;
       case 8:
         setspeed = newPos;
         rideled ();
+        FastLED[2].showLeds(255);
         break;
 
     }

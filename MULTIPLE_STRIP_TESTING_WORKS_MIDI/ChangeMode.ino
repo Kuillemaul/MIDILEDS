@@ -15,4 +15,20 @@ void modechange() {
        //padHit = 0;
   }
   last_interrupt_time = interrupt_time;
+  if (mode == 2) {
+    fill_solid(snarestrip, SNARELEDS, CHSV(snareColor, 255, brightness)); // Added to see what mode i was in. 
+    FastLED[6].showLeds(125);
+    delay(500);
+    FastLED[6].showLeds(0);
+    delay(500);
+    fill_solid(snarestrip, SNARELEDS, CHSV(tom1Color, 255, brightness));
+    FastLED[6].showLeds(125);
+    delay(500);
+    FastLED[6].showLeds(0);
+    delay(500);
+    fill_solid(snarestrip, SNARELEDS, CHSV(tom2Color, 255, brightness));
+    FastLED[6].showLeds(125);
+    delay(500);
+    FastLED[6].showLeds(0);
+  }
 }
