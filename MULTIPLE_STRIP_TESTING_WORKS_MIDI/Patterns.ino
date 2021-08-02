@@ -49,6 +49,7 @@ int newPos = encoder.getPosition();
     gHue++;  // slowly cycle the "base color" through the rainbow
   }
   EVERY_N_SECONDS(30) {
+<<<<<<< Updated upstream
     
       //Serial.print("A:");
       //Serial.print(gCurrentPatternNumber);
@@ -56,6 +57,14 @@ int newPos = encoder.getPosition();
       
       FastLED.setBrightness(brightness);
     }
+=======
+
+    //Serial.print("A:");
+    //Serial.print(gCurrentPatternNumber);
+    // Serial.println(".");
+
+    FastLED.setBrightness(patternBrightness);
+>>>>>>> Stashed changes
   }
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
@@ -221,6 +230,7 @@ void juggle() {
     dothue += 32;
   }
 }
+<<<<<<< Updated upstream
 // Fire2012 by Mark Kriegsman, July 2012
 // as part of "Five Elements" shown here: http://youtu.be/knWiGsmgycY
 //// 
@@ -302,3 +312,5 @@ void juggle() {
 //      strip3[pixelnumber] = color;
 //    }
 //}
+=======
+>>>>>>> Stashed changes
