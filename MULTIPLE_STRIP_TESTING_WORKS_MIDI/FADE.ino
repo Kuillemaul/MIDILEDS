@@ -18,7 +18,7 @@ void fade() {
     //Serial.print(newPos);
     //Serial.println();
     lastPos = newPos;
-    setspeed = newPos;
+    fadeSpeed = newPos;
   } // if
   //  unsigned long currentTime = millis();
   //  if (currentTime - previousTime >=  setspeed) {
@@ -34,7 +34,8 @@ void fade() {
   //for (int i = 0; i < NUM_STRIPS; i++) {
   //    FastLED[i].showLeds();  //Show Leds fading?
 
-  EVERY_N_MILLISECONDS( setspeed ) {
+  EVERY_N_MILLISECONDS_I( fadeTimerObj, FADE_SPEED ) {
+    fadeTimerObj.setPeriod( fadeSpeed);
     fadeToBlackBy(tom1strip, TOM1LEDS, 1);
     fadeToBlackBy(tom2strip, TOM2LEDS, 1);
     fadeToBlackBy(tom3strip, TOM3LEDS, 1);
@@ -43,21 +44,7 @@ void fade() {
     fadeToBlackBy(hihatstrip, HIHATLEDS, 1);
     fadeToBlackBy(crashstrip, CRASHLEDS, 1);
     fadeToBlackBy(ridestrip, RIDELEDS, 1);
-<<<<<<< Updated upstream
-
-<<<<<<< Updated upstream
-=======
-
-    //  for (int i = 0; i < NUM_STRIPS; i++) {
-    //    FastLED[i].showLeds();  //Show Leds fading?
-    //  }
     FastLED.show();
->>>>>>> Stashed changes
-=======
-for (int i = 0; i < NUM_STRIPS; i++) {
-    FastLED[i].showLeds();  //Show Leds fading?
-  }  
->>>>>>> Stashed changes
   }
 
 
@@ -67,81 +54,47 @@ for (int i = 0; i < NUM_STRIPS; i++) {
   EVERY_N_MILLISECONDS( 2000 ) {
     switch (padHit) {
       case 1:
-        setspeed = newPos;
-<<<<<<< Updated upstream
-        tom1led ();
-        FastLED[3].showLeds(255);
-        break;
-      case 2:
-        setspeed = newPos;
-        tom2led ();
-        FastLED[4].showLeds(255);
-        break;
-      case 3:
-        setspeed = newPos;
-        tom3led ();
-        FastLED[5].showLeds(255);
-        break;
-      case 4:
-        setspeed = newPos;
-        snareled ();
-        FastLED[6].showLeds(255);
-        break;
-      case 5:
-        setspeed = newPos;
-        bassled ();
-        FastLED[7].showLeds(255);
-        break;
-      case 6:
-        setspeed = newPos;
-        hihatled ();
-        FastLED[0].showLeds(255);
-        break;
-      case 7:
-        setspeed = newPos;
-        crashled ();
-        FastLED[1].showLeds(255);
-        break;
-      case 8:
-        setspeed = newPos;
-        rideled ();
-<<<<<<< Updated upstream
-=======
+        fadeSpeed = newPos;
         fill_solid(tom1strip, TOM1LEDS, CHSV(tom1Color, 255, brightness));
-=======
-        FastLED[2].showLeds(255);
->>>>>>> Stashed changes
+        FastLED[TOM1LEDS_F].showLeds(255);
         break;
       case 2:
-        setspeed = newPos;
+        fadeSpeed = newPos;
         fill_solid(tom2strip, TOM2LEDS, CHSV(tom2Color, 255, brightness));
+        FastLED[TOM2LEDS_F].showLeds(255);
         break;
       case 3:
-        setspeed = newPos;
+        fadeSpeed = newPos;
         fill_solid(tom3strip, TOM3LEDS, CHSV(tom3Color, 255, brightness));
+        FastLED[TOM3LEDS_F].showLeds(255);
         break;
       case 4:
-        setspeed = newPos;
+        fadeSpeed = newPos;
         fill_solid(snarestrip, SNARELEDS, CHSV(snareColor, 255, brightness));
+        FastLED[SNARELEDS_F].showLeds(255); 
         break;
       case 5:
-        setspeed = newPos;
+        fadeSpeed = newPos;
         fill_solid(bassstrip, BASSLEDS, CHSV(bassColor, 255, brightness));
+        FastLED[BASSLEDS_F].showLeds(255); 
         break;
       case 6:
-        setspeed = newPos;
+        fadeSpeed = newPos;
         fill_solid(hihatstrip, HIHATLEDS, CHSV(hihatColor, 255, brightness));
+        FastLED[HIHATLEDS_F].showLeds(255); 
         break;
       case 7:
-        setspeed = newPos;
+        fadeSpeed = newPos;
         fill_solid(crashstrip, CRASHLEDS, CHSV(crashColor, 255, brightness));
+        FastLED[CRASHLEDS_F].showLeds(255); 
         break;
       case 8:
-        setspeed = newPos;
+        fadeSpeed = newPos;
         fill_solid(ridestrip, RIDELEDS, CHSV(rideColor, 255, brightness));
->>>>>>> Stashed changes
+        FastLED[RIDELEDS_F].showLeds(255); 
         break;
-        FastLED.show();
     }
+    // FastLED.show();
   }
 }
+

@@ -18,14 +18,23 @@
 #define modeButton 2       //CHANGE MODE Center Encoder Button
 //NUMBER OF LEDS PER MIDI DRUM
 
-#define TOM1LEDS 0
-#define TOM2LEDS 1
-#define TOM3LEDS 2
-#define SNARELEDS 3
-#define BASSLEDS 4
-#define HIHATLEDS 5
-#define CRASHLEDS 6
-#define RIDELEDS 7
+#define TOM1LEDS_S 0
+#define TOM2LEDS_S 1
+#define TOM3LEDS_S 2
+#define SNARELEDS_S 3
+#define BASSLEDS_S 4
+#define HIHATLEDS_S 5
+#define CRASHLEDS_S 6
+#define RIDELEDS_S 7
+
+#define TOM1LEDS_F 3
+#define TOM2LEDS_F 4
+#define TOM3LEDS_F 5
+#define SNARELEDS_F 6
+#define BASSLEDS_F 7
+#define HIHATLEDS_F 0
+#define CRASHLEDS_F 1
+#define RIDELEDS_F 2
 
 
 #define TOM1LEDS 34
@@ -69,19 +78,15 @@ unsigned long startMillis = millis();
 
 //Drum Defaults
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-byte brightness = 125;
-=======
-byte brightness = 100;
->>>>>>> Stashed changes
-
-byte setspeed = 1;   // FADE SPEED
-=======
+uint16_t fadeSpeed = 1;   // FADE SPEED
+// EVERY_N_MILLISECONDS is a macro and can not actually take a variable.
+// A value of 1 is every millisecond. With persistence of vision
+// anything over 100Hz (10 milliseconds could be a bit much).
+// Lets try 10ms and work from there.
+#define FADE_SPEED 10 
 byte brightness = 100;
 byte patternBrightness = 75;
-unsigned long setspeed = 1;   // FADE SPEED
->>>>>>> Stashed changes
+// unsigned long setspeed = 1L;   // FADE SPEED
 
 byte tom1Color = 45; // COLOR
 byte tom2Color = 160;
@@ -109,7 +114,9 @@ CRGB ridestrip[RIDELEDS];
 CRGB leds[NUM_LEDS];
 CLEDController *controllers[NUM_STRIPS];
 
-
+//void modechange();
+//void coloredit ();
+//void fade();
 
 void setup() {
 
@@ -121,8 +128,6 @@ void setup() {
 
   // CREATE LED STRIPS
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
   controllers[0] = &FastLED.addLeds<WS2811, TOM1PIN, GRB>(tom1strip, TOM1LEDS);
   controllers[1] = &FastLED.addLeds<WS2811, TOM2PIN, GRB>(tom2strip, TOM2LEDS);
   controllers[2] = &FastLED.addLeds<WS2811, TOM3PIN, GRB>(tom3strip, TOM3LEDS);
@@ -132,123 +137,52 @@ void setup() {
   controllers[6] = &FastLED.addLeds<WS2811, CRASHPIN, GRB>(crashstrip, CRASHLEDS);
   controllers[7] = &FastLED.addLeds<WS2811, RIDEPIN, GRB>(ridestrip, RIDELEDS);
 
-  leds[0] = &tom1strip[0];
-  leds[1] = &tom2strip[0];
-  leds[2] = &tom3strip[0];
-  leds[3] = &snarestrip[0];
-  leds[4] = &bassstrip[0];
-  leds[5] = &hihatstrip[0];
-  leds[6] = &crashstrip[0];
-  leds[7] = &ridestrip[0];
-=======
-
-// TESTING NEW CODE FOUND IN https://github.com/FastLED/FastLED/wiki/Multiple-Controller-Examples I will also change the order and see if that chnages the outcome. 
-FastLED.addLeds<WS2812B, HIHATPIN, GRB>(hihatstrip, HIHATLEDS);
-FastLED.addLeds<WS2812B, CRASHPIN, GRB>(crashstrip, CRASHLEDS);
-FastLED.addLeds<WS2812B, RIDEPIN, GRB>(ridestrip, RIDELEDS);
-FastLED.addLeds<WS2812B, TOM1PIN, GRB>(tom1strip, TOM1LEDS);
-FastLED.addLeds<WS2812B, TOM2PIN, GRB>(tom2strip, TOM2LEDS);
-FastLED.addLeds<WS2812B, TOM3PIN, GRB>(tom3strip, TOM3LEDS);
-FastLED.addLeds<WS2812B, SNAREPIN, GRB>(snarestrip, SNARELEDS);
-FastLED.addLeds<WS2812B, BASSPIN, GRB>(bassstrip, BASSLEDS);
-
->>>>>>> Stashed changes
+  // TESTING NEW CODE FOUND IN https://github.com/FastLED/FastLED/wiki/Multiple-Controller-Examples I will also change the order and see if that chnages the outcome. 
+  FastLED.addLeds<WS2812B, HIHATPIN, GRB>(hihatstrip, HIHATLEDS);
+  FastLED.addLeds<WS2812B, CRASHPIN, GRB>(crashstrip, CRASHLEDS);
+  FastLED.addLeds<WS2812B, RIDEPIN, GRB>(ridestrip, RIDELEDS);
+  FastLED.addLeds<WS2812B, TOM1PIN, GRB>(tom1strip, TOM1LEDS);
+  FastLED.addLeds<WS2812B, TOM2PIN, GRB>(tom2strip, TOM2LEDS);
+  FastLED.addLeds<WS2812B, TOM3PIN, GRB>(tom3strip, TOM3LEDS);
+  FastLED.addLeds<WS2812B, SNAREPIN, GRB>(snarestrip, SNARELEDS);
+  FastLED.addLeds<WS2812B, BASSPIN, GRB>(bassstrip, BASSLEDS);
 
   attachInterrupt(digitalPinToInterrupt(modeButton), modechange, CHANGE); // Mode Change Interrupt -- Save setting if cant use pad hit. 
- 
-=======
-//  controllers[0] = &FastLED.addLeds<WS2812, TOM1PIN, GRB>(tom1strip, TOM1LEDS);
-//  controllers[1] = &FastLED.addLeds<WS2812, TOM2PIN, GRB>(tom2strip, TOM2LEDS);
-//  controllers[2] = &FastLED.addLeds<WS2812, TOM3PIN, GRB>(tom3strip, TOM3LEDS);
-//  controllers[3] = &FastLED.addLeds<WS2812, SNAREPIN, GRB>(snarestrip, SNARELEDS);
-//  controllers[4] = &FastLED.addLeds<WS2812, BASSPIN, GRB>(bassstrip, BASSLEDS);
-//  controllers[5] = &FastLED.addLeds<WS2812, HIHATPIN, GRB>(hihatstrip, HIHATLEDS);
-//  controllers[6] = &FastLED.addLeds<WS2812, CRASHPIN, GRB>(crashstrip, CRASHLEDS);
-//  controllers[7] = &FastLED.addLeds<WS2812, RIDEPIN, GRB>(ridestrip, RIDELEDS);
-//
-//  leds[0] = &tom1strip[0];
-//  leds[1] = &tom2strip[0];
-//  leds[2] = &tom3strip[0];
-//  leds[3] = &snarestrip[0];
-//  leds[4] = &bassstrip[0];
-//  leds[5] = &hihatstrip[0];
-//  leds[6] = &crashstrip[0];
-//  leds[7] = &ridestrip[0];
-
-// TESTING NEW CODE FOUND IN https://github.com/FastLED/FastLED/wiki/Multiple-Controller-Examples I will also change the order and see if that chnages the outcome. 
-FastLED.addLeds<WS2811, HIHATPIN, GRB>(hihatstrip, HIHATLEDS);
-FastLED.addLeds<WS2811, CRASHPIN, GRB>(crashstrip, CRASHLEDS);
-FastLED.addLeds<WS2811, RIDEPIN, GRB>(ridestrip, RIDELEDS);
-FastLED.addLeds<WS2811, TOM1PIN, GRB>(tom1strip, TOM1LEDS);
-FastLED.addLeds<WS2811, TOM2PIN, GRB>(tom2strip, TOM2LEDS);
-FastLED.addLeds<WS2811, TOM3PIN, GRB>(tom3strip, TOM3LEDS);
-FastLED.addLeds<WS2811, SNAREPIN, GRB>(snarestrip, SNARELEDS);
-FastLED.addLeds<WS2811, BASSPIN, GRB>(bassstrip, BASSLEDS);
-
-
-  attachInterrupt(digitalPinToInterrupt(modeButton), modechange, CHANGE); // Mode Change Interrupt
-  attachInterrupt(digitalPinToInterrupt(button1Pin), padchange, CHANGE); // Mode Change Interrupt
+  // attachInterrupt(digitalPinToInterrupt(button1Pin), padchange, CHANGE); // Mode Change Interrupt
   //pinMode(save, INPUT_PULLUP); //Pinmode for Encoder
 
->>>>>>> Stashed changes
   // TEST LED STRIPS
-
   fill_solid(hihatstrip, HIHATLEDS, CHSV(hihatColor, 255, brightness));
-  FastLED[0].showLeds(125);
+  FastLED[HIHATLEDS_F].showLeds(125);
   delay(1000);
+  
   fill_solid(crashstrip, CRASHLEDS, CHSV(crashColor, 255, brightness));
   delay(1000);
-  FastLED[1].showLeds(125);
+  FastLED[CRASHLEDS_F].showLeds(125);
+  
   fill_solid(ridestrip, RIDELEDS, CHSV(rideColor, 255, brightness));
-  FastLED[2].showLeds(125);
+  FastLED[RIDELEDS_F].showLeds(125);
   delay(1000);
+  
   fill_solid(tom1strip, TOM1LEDS, CHSV(tom1Color, 255, brightness));
   delay(1000);
-  FastLED[3].showLeds(125);
+  FastLED[TOM1LEDS_F].showLeds(125);
+  
   fill_solid(tom2strip, TOM2LEDS, CHSV(tom2Color, 255, brightness));
-  FastLED[4].showLeds(125);
+  FastLED[TOM2LEDS_F].showLeds(125);
   delay(1000);
+  
   fill_solid(tom3strip, TOM3LEDS, CHSV(tom3Color, 255, brightness));
-  FastLED[5].showLeds(125);
+  FastLED[TOM3LEDS_F].showLeds(125);
   delay(1000);
+  
   fill_solid(snarestrip, SNARELEDS, CHSV(snareColor, 255, brightness));
   delay(1000);
-  FastLED[6].showLeds(125);
+  FastLED[SNARELEDS_F].showLeds(125);
+  
   fill_solid(bassstrip, BASSLEDS, CHSV(bassColor, 255, brightness));
-  FastLED[7].showLeds(125);
+  FastLED[BASSLEDS_F].showLeds(125);
   delay(1000);
-
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-  fill_solid(tom1strip, TOM1LEDS, CHSV(0, 0, 0));
-  fill_solid(tom2strip, TOM2LEDS, CHSV(0, 0, 0));
-  fill_solid(tom3strip, TOM3LEDS, CHSV(0, 0, 0));
-  fill_solid(snarestrip, SNARELEDS, CHSV(0, 0, 0));
-  fill_solid(bassstrip, BASSLEDS, CHSV(0, 0, 0));
-  fill_solid(hihatstrip, HIHATLEDS, CHSV(0, 0, 0));
-  fill_solid(crashstrip, CRASHLEDS, CHSV(0, 0, 0));
-  fill_solid(ridestrip, RIDELEDS, CHSV(0, 0, 0));
-
-  controllers[0]->showLeds();
-  controllers[1]->showLeds();
-  controllers[2]->showLeds();
-  controllers[3]->showLeds();
-  controllers[4]->showLeds();
-  controllers[5]->showLeds();
-  controllers[6]->showLeds();
-  controllers[7]->showLeds();
-=======
-//  for (int i = 0; i < NUM_STRIPS; i++) {
-//    FastLED[i].showLeds(0);  //Should turn the leds off?
-//  }  
-// TESTING SUGGESTION OF USING THE BELLOW INSTEAD OF THE ABOVE
-
-FastLED.show();
->>>>>>> Stashed changes
-=======
-  for (int i = 0; i < NUM_STRIPS; i++) {
-    FastLED[i].showLeds(0);  //Should turn the leds off?
-  }  
 
 //  fill_solid(tom1strip, TOM1LEDS, CHSV(0, 0, 0));
 //  fill_solid(tom2strip, TOM2LEDS, CHSV(0, 0, 0));
@@ -259,16 +193,9 @@ FastLED.show();
 //  fill_solid(crashstrip, CRASHLEDS, CHSV(0, 0, 0));
 //  fill_solid(ridestrip, RIDELEDS, CHSV(0, 0, 0));
 //
-//  controllers[0]->showLeds();
-//  controllers[1]->showLeds();
-//  controllers[2]->showLeds();
-//  controllers[3]->showLeds();
-//  controllers[4]->showLeds();
-//  controllers[5]->showLeds();
-//  controllers[6]->showLeds();
-//  controllers[7]->showLeds();
->>>>>>> Stashed changes
-
+//  FastLED.show();
+  FastLED.clear();
+  
   delay(2000);
 
   startMillis = millis();
@@ -315,40 +242,17 @@ void loop() {
 //  if (currentTime - previousTime >=  setspeed) {
     /* Event code */
 
-    EVERY_N_MILLISECONDS( setspeed ) {
-    fadeToBlackBy(tom1strip, TOM1LEDS, 1);
-    fadeToBlackBy(tom2strip, TOM2LEDS, 1);
-    fadeToBlackBy(tom3strip, TOM3LEDS, 1);
-    fadeToBlackBy(snarestrip, SNARELEDS, 1);
-    fadeToBlackBy(bassstrip, BASSLEDS, 1);
-    fadeToBlackBy(hihatstrip, HIHATLEDS, 1);
-    fadeToBlackBy(crashstrip, CRASHLEDS, 1);
-    fadeToBlackBy(ridestrip, RIDELEDS, 1);
-
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-  }
-  for (int i = 0; i < NUM_STRIPS; i++) {
-    controllers[i]->showLeds();
-  }  
-=======
-  
-//  for (int i = 0; i < NUM_STRIPS; i++) {
-//    FastLED[i].showLeds();  //Show Leds fading?
-//  }
+    EVERY_N_MILLISECONDS_I( fadeTimerObj, FADE_SPEED ) {
+      fadeTimerObj.setPeriod( fadeSpeed);
+      fadeToBlackBy(tom1strip, TOM1LEDS, 1);
+      fadeToBlackBy(tom2strip, TOM2LEDS, 1);
+      fadeToBlackBy(tom3strip, TOM3LEDS, 1);
+      fadeToBlackBy(snarestrip, SNARELEDS, 1);
+      fadeToBlackBy(bassstrip, BASSLEDS, 1);
+      fadeToBlackBy(hihatstrip, HIHATLEDS, 1);
+      fadeToBlackBy(crashstrip, CRASHLEDS, 1);
+      fadeToBlackBy(ridestrip, RIDELEDS, 1);
+    }
  FastLED.show();
-=======
-  
-  for (int i = 0; i < NUM_STRIPS; i++) {
-    FastLED[i].showLeds();  //Show Leds fading?
-  } 
->>>>>>> Stashed changes
-  } 
-//  for (int i = 0; i < NUM_STRIPS; i++) {
-//    controllers[i]->showLeds();
-//  }  
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+
 }
