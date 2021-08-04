@@ -15,8 +15,8 @@ void fade() {
   } // if
 
   if (lastPos != newPos) {
-    //Serial.print(newPos);
-    //Serial.println();
+    Serial1.print(newPos);
+    Serial1.println();
     lastPos = newPos;
     fadeSpeed = newPos;
   } // if
@@ -97,4 +97,3 @@ void fade() {
     // FastLED.show();
   }
 }
-

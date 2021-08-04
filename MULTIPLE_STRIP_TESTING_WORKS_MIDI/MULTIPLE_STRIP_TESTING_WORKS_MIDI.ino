@@ -120,22 +120,22 @@ CLEDController *controllers[NUM_STRIPS];
 
 void setup() {
 
-  //Serial.begin (115200);  // SERIAL DEBUG
+  Serial1.begin (57600);  // SERIAL DEBUG
   pinMode (ledPin, OUTPUT);
   pinMode (button1Pin, INPUT);
   delay(2000); // PROTECTION DELAY
-  //Serial.println("Hello World");                     // TEST PRINT I AM ALIVE
+  Serial1.println("Hello World");                     // TEST PRINT I AM ALIVE
 
   // CREATE LED STRIPS
 
-  controllers[0] = &FastLED.addLeds<WS2811, TOM1PIN, GRB>(tom1strip, TOM1LEDS);
-  controllers[1] = &FastLED.addLeds<WS2811, TOM2PIN, GRB>(tom2strip, TOM2LEDS);
-  controllers[2] = &FastLED.addLeds<WS2811, TOM3PIN, GRB>(tom3strip, TOM3LEDS);
-  controllers[3] = &FastLED.addLeds<WS2811, SNAREPIN, GRB>(snarestrip, SNARELEDS);
-  controllers[4] = &FastLED.addLeds<WS2811, BASSPIN, GRB>(bassstrip, BASSLEDS);
-  controllers[5] = &FastLED.addLeds<WS2811, HIHATPIN, GRB>(hihatstrip, HIHATLEDS);
-  controllers[6] = &FastLED.addLeds<WS2811, CRASHPIN, GRB>(crashstrip, CRASHLEDS);
-  controllers[7] = &FastLED.addLeds<WS2811, RIDEPIN, GRB>(ridestrip, RIDELEDS);
+//  controllers[0] = &FastLED.addLeds<WS2811, TOM1PIN, GRB>(tom1strip, TOM1LEDS);
+//  controllers[1] = &FastLED.addLeds<WS2811, TOM2PIN, GRB>(tom2strip, TOM2LEDS);
+//  controllers[2] = &FastLED.addLeds<WS2811, TOM3PIN, GRB>(tom3strip, TOM3LEDS);
+//  controllers[3] = &FastLED.addLeds<WS2811, SNAREPIN, GRB>(snarestrip, SNARELEDS);
+//  controllers[4] = &FastLED.addLeds<WS2811, BASSPIN, GRB>(bassstrip, BASSLEDS);
+//  controllers[5] = &FastLED.addLeds<WS2811, HIHATPIN, GRB>(hihatstrip, HIHATLEDS);
+//  controllers[6] = &FastLED.addLeds<WS2811, CRASHPIN, GRB>(crashstrip, CRASHLEDS);
+//  controllers[7] = &FastLED.addLeds<WS2811, RIDEPIN, GRB>(ridestrip, RIDELEDS);
 
   // TESTING NEW CODE FOUND IN https://github.com/FastLED/FastLED/wiki/Multiple-Controller-Examples I will also change the order and see if that chnages the outcome. 
   FastLED.addLeds<WS2812B, HIHATPIN, GRB>(hihatstrip, HIHATLEDS);
@@ -152,6 +152,7 @@ void setup() {
   //pinMode(save, INPUT_PULLUP); //Pinmode for Encoder
 
   // TEST LED STRIPS
+  Serial1.println("Testing Strips");
   fill_solid(hihatstrip, HIHATLEDS, CHSV(hihatColor, 255, brightness));
   FastLED[HIHATLEDS_F].showLeds(125);
   delay(1000);

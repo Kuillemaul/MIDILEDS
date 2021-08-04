@@ -7,8 +7,8 @@ void modechange() {
       mode ++; 
     else
       mode = 0;
-    //Serial.println("Mode Counter is");
-    //Serial.println(mode);
+    Serial1.println("Mode Counter is");
+    Serial1.println(mode);
     //redraw = true;
     //delay(20);
     //clearLCD();

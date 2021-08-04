@@ -6,10 +6,10 @@ void coloredit () {
 
   byte newcolorPos = encoder.getPosition();
   if (colorpos != newcolorPos) {
-    //Serial.print("pos:");
-    //Serial.print(newPos);
-    //Serial.print(" dir:");
-    //Serial.println((int)(encoder.getDirection()));
+    Serial1.print("pos:");
+    Serial1.print(newcolorPos);
+    Serial1.print(" dir:");
+    Serial1.println((int)(encoder.getDirection()));
     colorpos = newcolorPos;
     //delay (20);
   }
