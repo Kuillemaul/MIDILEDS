@@ -10,7 +10,7 @@ void modechange() {
     //Serial.println("Mode Counter is");
     //Serial.println(mode);
     //redraw = true;
-    delay(20);
+    //delay(20);
     //clearLCD();
        //padHit = 0;
   }
