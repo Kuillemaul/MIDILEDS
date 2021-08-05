@@ -1,6 +1,7 @@
 #include <FastLED.h>
 #include <RotaryEncoder.h>
 #include <MIDI.h>  // Add Midi Library
+#include "SparkFun_Qwiic_Twist_Arduino_Library.h"
 
 // LED STRIP PIN FOR EACH MIDI DRUM
 #define TOM1PIN 31
@@ -12,10 +13,6 @@
 #define CRASHPIN 43
 #define RIDEPIN 45
 
-//DEBUG AND TESTING
-#define ledPin 7 //DEBUG LED PIN
-#define button1Pin 5       //PAD CHANGE IN PLACE OF MIDI HIT
-#define modeButton 2       //CHANGE MODE Center Encoder Button
 //NUMBER OF LEDS PER MIDI DRUM
 
 #define TOM1LEDS 0
@@ -27,6 +24,7 @@
 #define CRASHLEDS 6
 #define RIDELEDS 7
 
+//NUMBER OF LEDS PER MIDI DRUM
 
 #define TOM1LEDS 34
 #define TOM2LEDS 34
@@ -39,18 +37,6 @@
 #define NUM_LEDS TOM1LEDS+TOM2LEDS+TOM3LEDS+SNARELEDS+BASSLEDS+HIHATLEDS+CRASHLEDS+RIDELEDS // TOTAL LEDS
 #define NUM_STRIPS  8  // TOTAL STRIPS
 
-// Encoder Settings
-#define PIN_IN1 4 //UP PIN
-#define PIN_IN2 3 //DOWN PIN
-
-#define COLORROTARYSTEPS 3
-#define SPEEDROTARYSTEPS 1
-#define colormin 0 // COLOR SETTINGS
-#define colormax 255
-
-#define speedmin 0 // SPEED SETTING
-#define speedmax 200
-
 // PATTERN SPECIFIC SETTINGS
 #define FRAMES_PER_SECOND  120
 #define SPARKING 190
@@ -58,7 +44,7 @@
 
 //DEFAULTS AND VARIABLES
 
-MIDI_CREATE_DEFAULT_INSTANCE();
+//MIDI_CREATE_DEFAULT_INSTANCE();
 
 volatile byte mode = 0; //INTERUPT FOR MODE SETTING ENCODER BUTTON
 volatile byte padHit = 0;
@@ -103,32 +89,31 @@ CLEDController *controllers[NUM_STRIPS];
 
 void setup() {
 
-  //Serial.begin (115200);  // SERIAL DEBUG
+  Serial.begin (115200);  // SERIAL DEBUG
   pinMode (ledPin, OUTPUT);
   pinMode (button1Pin, INPUT);
   delay(2000); // PROTECTION DELAY
-  //Serial.println("Hello World");                     // TEST PRINT I AM ALIVE
+  Serial.println("Hello World");                     // TEST PRINT I AM ALIVE
+  if (twist.begin() == false)
+  {
+    Serial.println("Twist does not appear to be connected. Please check wiring. Freezing...");
+    while (1);
+  }
+
+  int currentVersion = twist.getVersion();
+
+  if (currentVersion < 0x0201) //v1.2 in two byte form
+  {
+    Serial.print("The current firmware version is: ");
+    Serial.print(currentVersion & 0xFF);
+    Serial.print(".");
+    Serial.println(currentVersion >> 8);
+
+    Serial.println("This feature is not supported. Please consider upgrading the firmware on your Qwiic Twist. Freezing.");
+    while (1); //Freeze
+  }
 
   // CREATE LED STRIPS
-
-//  controllers[0] = &FastLED.addLeds<WS2812, TOM1PIN, GRB>(tom1strip, TOM1LEDS);
-//  controllers[1] = &FastLED.addLeds<WS2812, TOM2PIN, GRB>(tom2strip, TOM2LEDS);
-//  controllers[2] = &FastLED.addLeds<WS2812, TOM3PIN, GRB>(tom3strip, TOM3LEDS);
-//  controllers[3] = &FastLED.addLeds<WS2812, SNAREPIN, GRB>(snarestrip, SNARELEDS);
-//  controllers[4] = &FastLED.addLeds<WS2812, BASSPIN, GRB>(bassstrip, BASSLEDS);
-//  controllers[5] = &FastLED.addLeds<WS2812, HIHATPIN, GRB>(hihatstrip, HIHATLEDS);
-//  controllers[6] = &FastLED.addLeds<WS2812, CRASHPIN, GRB>(crashstrip, CRASHLEDS);
-//  controllers[7] = &FastLED.addLeds<WS2812, RIDEPIN, GRB>(ridestrip, RIDELEDS);
-//
-//  leds[0] = &tom1strip[0];
-//  leds[1] = &tom2strip[0];
-//  leds[2] = &tom3strip[0];
-//  leds[3] = &snarestrip[0];
-//  leds[4] = &bassstrip[0];
-//  leds[5] = &hihatstrip[0];
-//  leds[6] = &crashstrip[0];
-//  leds[7] = &ridestrip[0];
-
 // TESTING NEW CODE FOUND IN https://github.com/FastLED/FastLED/wiki/Multiple-Controller-Examples I will also change the order and see if that chnages the outcome. 
 FastLED.addLeds<WS2812B, HIHATPIN, GRB>(hihatstrip, HIHATLEDS);
 FastLED.addLeds<WS2812B, CRASHPIN, GRB>(crashstrip, CRASHLEDS);
