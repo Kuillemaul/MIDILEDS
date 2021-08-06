@@ -52,7 +52,6 @@ String padName = "none";
 
 //Drum Defaults
 
-byte brightness = 100;
 
 // PAD BRIGHTNESS
 
@@ -92,19 +91,18 @@ byte crashColor = 160;
 byte rideColor = 95;
 
 // CREATE STRIP ARRAYS
-
+CRGB hihatstrip[HIHATLEDS];
+CRGB crashstrip[CRASHLEDS];
+CRGB ridestrip[RIDELEDS];
 CRGB tom1strip[TOM1LEDS];
 CRGB tom2strip[TOM1LEDS];
 CRGB tom3strip[TOM1LEDS];
 CRGB snarestrip[SNARELEDS];
 CRGB bassstrip[BASSLEDS];
-CRGB hihatstrip[HIHATLEDS];
-CRGB crashstrip[CRASHLEDS];
-CRGB ridestrip[RIDELEDS];
 CRGB leds[NUM_LEDS];
 CLEDController *controllers[NUM_STRIPS];
 
-
+TWIST twist
 
 void setup() {
 
@@ -145,28 +143,28 @@ FastLED.addLeds<WS2812B, BASSPIN, GRB>(bassstrip, BASSLEDS);
 
   // TEST LED STRIPS
 
-  fill_solid(hihatstrip, HIHATLEDS, CHSV(hihatColor, 255, brightness));
+  fill_solid(hihatstrip, HIHATLEDS, CHSV(hihatColor, 255, hihatBrightness));
   FastLED[0].showLeds(125);
   delay(1000);
-  fill_solid(crashstrip, CRASHLEDS, CHSV(crashColor, 255, brightness));
+  fill_solid(crashstrip, CRASHLEDS, CHSV(crashColor, 255, crashBrightness));
   delay(1000);
   FastLED[1].showLeds(125);
-  fill_solid(ridestrip, RIDELEDS, CHSV(rideColor, 255, brightness));
+  fill_solid(ridestrip, RIDELEDS, CHSV(rideColor, 255, rideBrightness));
   FastLED[2].showLeds(125);
   delay(1000);
-  fill_solid(tom1strip, TOM1LEDS, CHSV(tom1Color, 255, brightness));
+  fill_solid(tom1strip, TOM1LEDS, CHSV(tom1Color, 255, tom1Brightness));
   delay(1000);
   FastLED[3].showLeds(125);
-  fill_solid(tom2strip, TOM2LEDS, CHSV(tom2Color, 255, brightness));
+  fill_solid(tom2strip, TOM2LEDS, CHSV(tom2Color, 255, tom2Brightness));
   FastLED[4].showLeds(125);
   delay(1000);
-  fill_solid(tom3strip, TOM3LEDS, CHSV(tom3Color, 255, brightness));
+  fill_solid(tom3strip, TOM3LEDS, CHSV(tom3Color, 255, tom3Brightness));
   FastLED[5].showLeds(125);
   delay(1000);
-  fill_solid(snarestrip, SNARELEDS, CHSV(snareColor, 255, brightness));
+  fill_solid(snarestrip, SNARELEDS, CHSV(snareColor, 255, snareBrightness));
   delay(1000);
   FastLED[6].showLeds(125);
-  fill_solid(bassstrip, BASSLEDS, CHSV(bassColor, 255, brightness));
+  fill_solid(bassstrip, BASSLEDS, CHSV(bassColor, 255, bassBrightness));
   FastLED[7].showLeds(125);
   delay(1000);
 
@@ -188,23 +186,25 @@ uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 void loop() {
 
   usbMIDI.read(); // Continuously check if Midi data has been received.
+if(twist.isClicked()) setMode ++;
 
   // CHECK IF AN EDIT MODE IS ENABLED
 
-  if (mode > 0) {
-    switch(mode) {
-      case 1: 
-        patterns();
-        break;
-      case 2: 
-        coloredit();
-        break;
-      case 3: 
-        fade();
-        break;
-      default:
-        break;
-    }
+  if (setMode == 1) {
+    editMode();
+  }
+  if (setEdit == 1 ) {
+    colorEdit ();
+  }
+  if (setEdit == 3 ) {
+    fade();
+  }
+  //if (setMode == 4 ) { // FUTURE DEVELOPMENT
+  //  setMinBrightness();
+  //}
+  if (setMode == 2) {
+    patterns();
+  }
   }
   /* THIS FADES THE LED STRIP */
  EVERY_N_MILLISECONDS (5) {
