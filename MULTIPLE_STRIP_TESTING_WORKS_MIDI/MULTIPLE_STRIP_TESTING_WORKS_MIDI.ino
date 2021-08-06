@@ -1,19 +1,20 @@
+#include <Arduino.h>
 #include <FastLED.h>
 #include <RotaryEncoder.h>
 #include <MIDI.h>  // Add Midi Library
 #include "SparkFun_Qwiic_Twist_Arduino_Library.h"
 
 // LED STRIP PIN FOR EACH MIDI DRUM
-#define TOM1PIN 31
-#define TOM2PIN 33
-#define TOM3PIN 35
-#define SNAREPIN 37
-#define BASSPIN 39
-#define HIHATPIN 41
-#define CRASHPIN 43
-#define RIDEPIN 45
+#define TOM1PIN 2
+#define TOM2PIN 3
+#define TOM3PIN 4
+#define SNAREPIN 5
+#define BASSPIN 6
+#define HIHATPIN 7
+#define CRASHPIN 8
+#define RIDEPIN 9
 
-//NUMBER OF LEDS PER MIDI DRUM
+//CONTROLLER NUMBERS
 
 #define TOM1LEDS 0
 #define TOM2LEDS 1
@@ -42,24 +43,46 @@
 #define SPARKING 190
 #define COOLING  55
 
-//DEFAULTS AND VARIABLES
+//--------------------DEFAULTS AND VARIABLES
 
-//MIDI_CREATE_DEFAULT_INSTANCE();
-
-volatile byte mode = 0; //INTERUPT FOR MODE SETTING ENCODER BUTTON
+byte mode = 0; 
 volatile byte padHit = 0;
 
 String padName = "none";
-unsigned long previousTime = 0;
-unsigned long startMillis = millis();
 
 //Drum Defaults
 
 byte brightness = 100;
 
-byte setspeed = 1;   // FADE SPEED
+// PAD BRIGHTNESS
 
-byte tom1Color = 45; // COLOR
+byte tom1Brightness = 255; 
+byte tom2Brightness = 255;
+byte tom3Brightness = 255;
+byte snareBrightness = 255;
+byte bassBrightness = 255;
+byte hihatBrightness = 255;
+byte crashBrightness = 255;
+byte rideBrightness = 255; 
+
+// MIN BRIGHTNESS
+
+minBrightness = 0;
+
+// FADE SPEED
+
+byte tom1Fade = 1; 
+byte tom2Fade = 1;
+byte tom3Fade = 1;
+byte snareFade = 1;
+byte bassFade = 1;
+byte hihatFade = 1;
+byte crashFade = 1;
+byte rideFade = 1;  
+
+// COLOR
+
+byte tom1Color = 45; 
 byte tom2Color = 160;
 byte tom3Color = 95;
 byte snareColor = 0;
@@ -68,12 +91,8 @@ byte hihatColor = 45;
 byte crashColor = 160;
 byte rideColor = 95;
 
-//ENCODER
-RotaryEncoder encoder(PIN_IN1, PIN_IN2, RotaryEncoder::LatchMode::TWO03);
-int lastPos = -1;
-byte colorpos = 0;
-
 // CREATE STRIP ARRAYS
+
 CRGB tom1strip[TOM1LEDS];
 CRGB tom2strip[TOM1LEDS];
 CRGB tom3strip[TOM1LEDS];
@@ -90,8 +109,7 @@ CLEDController *controllers[NUM_STRIPS];
 void setup() {
 
   Serial.begin (115200);  // SERIAL DEBUG
-  pinMode (ledPin, OUTPUT);
-  pinMode (button1Pin, INPUT);
+
   delay(2000); // PROTECTION DELAY
   Serial.println("Hello World");                     // TEST PRINT I AM ALIVE
   if (twist.begin() == false)
@@ -125,10 +143,6 @@ FastLED.addLeds<WS2812B, SNAREPIN, GRB>(snarestrip, SNARELEDS);
 FastLED.addLeds<WS2812B, BASSPIN, GRB>(bassstrip, BASSLEDS);
 
 
-  attachInterrupt(digitalPinToInterrupt(modeButton), modechange, CHANGE); // Mode Change Interrupt
-  attachInterrupt(digitalPinToInterrupt(button1Pin), padchange, CHANGE); // Mode Change Interrupt
-  //pinMode(save, INPUT_PULLUP); //Pinmode for Encoder
-
   // TEST LED STRIPS
 
   fill_solid(hihatstrip, HIHATLEDS, CHSV(hihatColor, 255, brightness));
@@ -160,32 +174,8 @@ FastLED.addLeds<WS2812B, BASSPIN, GRB>(bassstrip, BASSLEDS);
     FastLED[i].showLeds(0);  //Should turn the leds off?
   }  
 
-//  fill_solid(tom1strip, TOM1LEDS, CHSV(0, 0, 0));
-//  fill_solid(tom2strip, TOM2LEDS, CHSV(0, 0, 0));
-//  fill_solid(tom3strip, TOM3LEDS, CHSV(0, 0, 0));
-//  fill_solid(snarestrip, SNARELEDS, CHSV(0, 0, 0));
-//  fill_solid(bassstrip, BASSLEDS, CHSV(0, 0, 0));
-//  fill_solid(hihatstrip, HIHATLEDS, CHSV(0, 0, 0));
-//  fill_solid(crashstrip, CRASHLEDS, CHSV(0, 0, 0));
-//  fill_solid(ridestrip, RIDELEDS, CHSV(0, 0, 0));
-//
-//  controllers[0]->showLeds();
-//  controllers[1]->showLeds();
-//  controllers[2]->showLeds();
-//  controllers[3]->showLeds();
-//  controllers[4]->showLeds();
-//  controllers[5]->showLeds();
-//  controllers[6]->showLeds();
-//  controllers[7]->showLeds();
-
-  delay(2000);
-
-  startMillis = millis();
-
-  MIDI.setHandleNoteOn(MyHandleNoteOn); // Calls when not is on
-  MIDI.begin(10); // Initialize the Midi Library on channel 10  
-  MIDI. turnThruOff();
-
+usbMIDI.setHandleNoteOn(MyHandleNoteOn);
+  
 }
 // PATTERNS SETUP
 
@@ -197,7 +187,7 @@ uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 
 void loop() {
 
-  MIDI.read(); // Continuously check if Midi data has been received.
+  usbMIDI.read(); // Continuously check if Midi data has been received.
 
   // CHECK IF AN EDIT MODE IS ENABLED
 
@@ -217,24 +207,17 @@ void loop() {
     }
   }
   /* THIS FADES THE LED STRIP */
-  unsigned long currentTime = millis();
-  if (currentTime - previousTime >=  setspeed) {
-    /* Event code */
-    fadeToBlackBy(tom1strip, TOM1LEDS, 1);
-    fadeToBlackBy(tom2strip, TOM2LEDS, 1);
-    fadeToBlackBy(tom3strip, TOM3LEDS, 1);
-    fadeToBlackBy(snarestrip, SNARELEDS, 1);
-    fadeToBlackBy(bassstrip, BASSLEDS, 1);
-    fadeToBlackBy(hihatstrip, HIHATLEDS, 1);
-    fadeToBlackBy(crashstrip, CRASHLEDS, 1);
-    fadeToBlackBy(ridestrip, RIDELEDS, 1);
-
-  
-  for (int i = 0; i < NUM_STRIPS; i++) {
-    FastLED[i].showLeds();  //Show Leds fading?
-  } 
-  } 
-//  for (int i = 0; i < NUM_STRIPS; i++) {
-//    controllers[i]->showLeds();
-//  }  
+ EVERY_N_MILLISECONDS (5) {
+    if ((hihatBrightness) > (minBrightness)) {
+      hihatBrightness-(hihatFade);
+      FastLED[0].showLeds(hihatBrightness);
+    }
+    if ((snareBrightness) > (minBrightness)) {
+      snareBrightness-(snareFade);
+      FastLED[1].showLeds(snareBrightness);
+    }
+    if (bassBrightness > minBrightness) {
+      bassBrightness-(bassFade);
+      FastLED[2].showLeds(bassBrightness);
+    }
 }
