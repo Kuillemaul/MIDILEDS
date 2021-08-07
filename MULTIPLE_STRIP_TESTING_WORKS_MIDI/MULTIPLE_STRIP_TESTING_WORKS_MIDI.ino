@@ -1,22 +1,32 @@
+#include <Arduino.h>
 #include <FastLED.h>
 #include <RotaryEncoder.h>
 #include <MIDI.h>  // Add Midi Library
+#include "SparkFun_Qwiic_Twist_Arduino_Library.h"
 
 // LED STRIP PIN FOR EACH MIDI DRUM
-#define TOM1PIN 31
-#define TOM2PIN 33
-#define TOM3PIN 35
-#define SNAREPIN 37
-#define BASSPIN 39
-#define HIHATPIN 41
-#define CRASHPIN 43
-#define RIDEPIN 45
+#define TOM1PIN 2
+#define TOM2PIN 3
+#define TOM3PIN 4
+#define SNAREPIN 5
+#define BASSPIN 6
+#define HIHATPIN 7
+#define CRASHPIN 8
+#define RIDEPIN 9
 
-//DEBUG AND TESTING
-#define ledPin 7 //DEBUG LED PIN
-#define button1Pin 5       //PAD CHANGE IN PLACE OF MIDI HIT
-#define modeButton 2       //CHANGE MODE Center Encoder Button
+//CONTROLLER NUMBERS
+
+#define TOM1LEDS 0
+#define TOM2LEDS 1
+#define TOM3LEDS 2
+#define SNARELEDS 3
+#define BASSLEDS 4
+#define HIHATLEDS 5
+#define CRASHLEDS 6
+#define RIDELEDS 7
+
 //NUMBER OF LEDS PER MIDI DRUM
+
 #define TOM1LEDS 34
 #define TOM2LEDS 34
 #define TOM3LEDS 34
@@ -25,44 +35,53 @@
 #define HIHATLEDS 30
 #define CRASHLEDS 37
 #define RIDELEDS 37
-#define NUM_LEDS 327  // TOTAL LEDS
+#define NUM_LEDS TOM1LEDS+TOM2LEDS+TOM3LEDS+SNARELEDS+BASSLEDS+HIHATLEDS+CRASHLEDS+RIDELEDS // TOTAL LEDS
 #define NUM_STRIPS  8  // TOTAL STRIPS
-
-// Encoder Settings
-#define PIN_IN1 4 //UP PIN
-#define PIN_IN2 3 //DOWN PIN
-
-#define COLORROTARYSTEPS 3
-#define SPEEDROTARYSTEPS 1
-#define colormin 0 // COLOR SETTINGS
-#define colormax 255
-
-#define speedmin 0 // SPEED SETTING
-#define speedmax 200
 
 // PATTERN SPECIFIC SETTINGS
 #define FRAMES_PER_SECOND  120
 #define SPARKING 190
 #define COOLING  55
 
-//DEFAULTS AND VARIABLES
+//--------------------DEFAULTS AND VARIABLES
 
-MIDI_CREATE_DEFAULT_INSTANCE();
-
-volatile byte mode = 0; //INTERUPT FOR MODE SETTING ENCODER BUTTON
+byte mode = 0; 
 volatile byte padHit = 0;
 
 String padName = "none";
-unsigned long previousTime = 0;
-unsigned long startMillis = millis();
 
 //Drum Defaults
 
-byte brightness = 125;
 
-byte setspeed = 1;   // FADE SPEED
+// PAD BRIGHTNESS
 
-byte tom1Color = 45; // COLOR
+byte tom1Brightness = 255; 
+byte tom2Brightness = 255;
+byte tom3Brightness = 255;
+byte snareBrightness = 255;
+byte bassBrightness = 255;
+byte hihatBrightness = 255;
+byte crashBrightness = 255;
+byte rideBrightness = 255; 
+
+// MIN BRIGHTNESS
+
+minBrightness = 0;
+
+// FADE SPEED
+
+byte tom1Fade = 1; 
+byte tom2Fade = 1;
+byte tom3Fade = 1;
+byte snareFade = 1;
+byte bassFade = 1;
+byte hihatFade = 1;
+byte crashFade = 1;
+byte rideFade = 1;  
+
+// COLOR
+
+byte tom1Color = 45; 
 byte tom2Color = 160;
 byte tom3Color = 95;
 byte snareColor = 0;
@@ -71,101 +90,91 @@ byte hihatColor = 45;
 byte crashColor = 160;
 byte rideColor = 95;
 
-//ENCODER
-RotaryEncoder encoder(PIN_IN1, PIN_IN2, RotaryEncoder::LatchMode::TWO03);
-int lastPos = -1;
-
 // CREATE STRIP ARRAYS
+CRGB hihatstrip[HIHATLEDS];
+CRGB crashstrip[CRASHLEDS];
+CRGB ridestrip[RIDELEDS];
 CRGB tom1strip[TOM1LEDS];
 CRGB tom2strip[TOM1LEDS];
 CRGB tom3strip[TOM1LEDS];
 CRGB snarestrip[SNARELEDS];
 CRGB bassstrip[BASSLEDS];
-CRGB hihatstrip[HIHATLEDS];
-CRGB crashstrip[CRASHLEDS];
-CRGB ridestrip[RIDELEDS];
 CRGB leds[NUM_LEDS];
 CLEDController *controllers[NUM_STRIPS];
 
-
+TWIST twist
 
 void setup() {
 
-  //Serial.begin (115200);  // SERIAL DEBUG
-  pinMode (ledPin, OUTPUT);
-  pinMode (button1Pin, INPUT);
+  Serial.begin (115200);  // SERIAL DEBUG
+
   delay(2000); // PROTECTION DELAY
-  //Serial.println("Hello World");                     // TEST PRINT I AM ALIVE
+  Serial.println("Hello World");                     // TEST PRINT I AM ALIVE
+  if (twist.begin() == false)
+  {
+    Serial.println("Twist does not appear to be connected. Please check wiring. Freezing...");
+    while (1);
+  }
+
+  int currentVersion = twist.getVersion();
+
+  if (currentVersion < 0x0201) //v1.2 in two byte form
+  {
+    Serial.print("The current firmware version is: ");
+    Serial.print(currentVersion & 0xFF);
+    Serial.print(".");
+    Serial.println(currentVersion >> 8);
+
+    Serial.println("This feature is not supported. Please consider upgrading the firmware on your Qwiic Twist. Freezing.");
+    while (1); //Freeze
+  }
 
   // CREATE LED STRIPS
+// TESTING NEW CODE FOUND IN https://github.com/FastLED/FastLED/wiki/Multiple-Controller-Examples I will also change the order and see if that chnages the outcome. 
+FastLED.addLeds<WS2812B, HIHATPIN, GRB>(hihatstrip, HIHATLEDS);
+FastLED.addLeds<WS2812B, CRASHPIN, GRB>(crashstrip, CRASHLEDS);
+FastLED.addLeds<WS2812B, RIDEPIN, GRB>(ridestrip, RIDELEDS);
+FastLED.addLeds<WS2812B, TOM1PIN, GRB>(tom1strip, TOM1LEDS);
+FastLED.addLeds<WS2812B, TOM2PIN, GRB>(tom2strip, TOM2LEDS);
+FastLED.addLeds<WS2812B, TOM3PIN, GRB>(tom3strip, TOM3LEDS);
+FastLED.addLeds<WS2812B, SNAREPIN, GRB>(snarestrip, SNARELEDS);
+FastLED.addLeds<WS2812B, BASSPIN, GRB>(bassstrip, BASSLEDS);
 
-  controllers[0] = &FastLED.addLeds<WS2811, TOM1PIN, GRB>(tom1strip, TOM1LEDS);
-  controllers[1] = &FastLED.addLeds<WS2811, TOM2PIN, GRB>(tom2strip, TOM2LEDS);
-  controllers[2] = &FastLED.addLeds<WS2811, TOM3PIN, GRB>(tom3strip, TOM3LEDS);
-  controllers[3] = &FastLED.addLeds<WS2811, SNAREPIN, GRB>(snarestrip, SNARELEDS);
-  controllers[4] = &FastLED.addLeds<WS2811, BASSPIN, GRB>(bassstrip, BASSLEDS);
-  controllers[5] = &FastLED.addLeds<WS2811, HIHATPIN, GRB>(hihatstrip, HIHATLEDS);
-  controllers[6] = &FastLED.addLeds<WS2811, CRASHPIN, GRB>(crashstrip, CRASHLEDS);
-  controllers[7] = &FastLED.addLeds<WS2811, RIDEPIN, GRB>(ridestrip, RIDELEDS);
-
-  attachInterrupt(digitalPinToInterrupt(modeButton), modechange, CHANGE); // Mode Change Interrupt
-  attachInterrupt(digitalPinToInterrupt(button1Pin), padchange, CHANGE); // Mode Change Interrupt
-  //pinMode(save, INPUT_PULLUP); //Pinmode for Encoder
 
   // TEST LED STRIPS
 
-  fill_solid(tom1strip, TOM1LEDS, CHSV(tom1Color, 255, brightness));
+  fill_solid(hihatstrip, HIHATLEDS, CHSV(hihatColor, 255, hihatBrightness));
+  FastLED[0].showLeds(125);
   delay(1000);
-  controllers[0]->showLeds(125);
-  fill_solid(tom2strip, TOM2LEDS, CHSV(tom2Color, 255, brightness));
-  controllers[1]->showLeds(125);
+  fill_solid(crashstrip, CRASHLEDS, CHSV(crashColor, 255, crashBrightness));
   delay(1000);
-  fill_solid(tom3strip, TOM3LEDS, CHSV(tom3Color, 255, brightness));
-  controllers[2]->showLeds(125);
+  FastLED[1].showLeds(125);
+  fill_solid(ridestrip, RIDELEDS, CHSV(rideColor, 255, rideBrightness));
+  FastLED[2].showLeds(125);
   delay(1000);
-  fill_solid(snarestrip, SNARELEDS, CHSV(snareColor, 255, brightness));
+  fill_solid(tom1strip, TOM1LEDS, CHSV(tom1Color, 255, tom1Brightness));
   delay(1000);
-  controllers[3]->showLeds(125);
-  fill_solid(bassstrip, BASSLEDS, CHSV(bassColor, 255, brightness));
-  controllers[4]->showLeds(125);
+  FastLED[3].showLeds(125);
+  fill_solid(tom2strip, TOM2LEDS, CHSV(tom2Color, 255, tom2Brightness));
+  FastLED[4].showLeds(125);
   delay(1000);
-  fill_solid(hihatstrip, HIHATLEDS, CHSV(hihatColor, 255, brightness));
-  controllers[5]->showLeds(125);
+  fill_solid(tom3strip, TOM3LEDS, CHSV(tom3Color, 255, tom3Brightness));
+  FastLED[5].showLeds(125);
   delay(1000);
-  fill_solid(crashstrip, CRASHLEDS, CHSV(crashColor, 255, brightness));
+  fill_solid(snarestrip, SNARELEDS, CHSV(snareColor, 255, snareBrightness));
   delay(1000);
-  controllers[6]->showLeds(125);
-  fill_solid(ridestrip, RIDELEDS, CHSV(rideColor, 255, brightness));
-  controllers[7]->showLeds(125);
+  FastLED[6].showLeds(125);
+  fill_solid(bassstrip, BASSLEDS, CHSV(bassColor, 255, bassBrightness));
+  FastLED[7].showLeds(125);
   delay(1000);
 
-  fill_solid(tom1strip, TOM1LEDS, CHSV(0, 0, 0));
-  fill_solid(tom2strip, TOM2LEDS, CHSV(0, 0, 0));
-  fill_solid(tom3strip, TOM3LEDS, CHSV(0, 0, 0));
-  fill_solid(snarestrip, SNARELEDS, CHSV(0, 0, 0));
-  fill_solid(bassstrip, BASSLEDS, CHSV(0, 0, 0));
-  fill_solid(hihatstrip, HIHATLEDS, CHSV(0, 0, 0));
-  fill_solid(crashstrip, CRASHLEDS, CHSV(0, 0, 0));
-  fill_solid(ridestrip, RIDELEDS, CHSV(0, 0, 0));
+  for (int i = 0; i < NUM_STRIPS; i++) {
+    FastLED[i].showLeds(0);  //Should turn the leds off?
+  }  
 
-  controllers[0]->showLeds();
-  controllers[1]->showLeds();
-  controllers[2]->showLeds();
-  controllers[3]->showLeds();
-  controllers[4]->showLeds();
-  controllers[5]->showLeds();
-  controllers[6]->showLeds();
-  controllers[7]->showLeds();
-
-  delay(2000);
-
-  startMillis = millis();
-
-  MIDI.setHandleNoteOn(MyHandleNoteOn); // Calls when not is on
-  MIDI.begin(10); // Initialize the Midi Library on channel 10
-
+usbMIDI.setHandleNoteOn(MyHandleNoteOn);
+  
 }
-
 // PATTERNS SETUP
 
 typedef void (*SimplePatternList[])();
@@ -176,49 +185,39 @@ uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 
 void loop() {
 
-  MIDI.read(); // Continuously check if Midi data has been received.
+  usbMIDI.read(); // Continuously check if Midi data has been received.
+if(twist.isClicked()) setMode ++;
 
   // CHECK IF AN EDIT MODE IS ENABLED
 
-  if (mode == 1) {
-    patterns();
+  if (setMode == 1) {
+    editMode();
   }
-
-  if (mode == 2) {
-    coloredit();
+  if (setEdit == 1 ) {
+    colorEdit ();
   }
-  if (mode == 3) {
+  if (setEdit == 3 ) {
     fade();
   }
-  if (mode == 0) {
-
-
+  //if (setMode == 4 ) { // FUTURE DEVELOPMENT
+  //  setMinBrightness();
+  //}
+  if (setMode == 2) {
+    patterns();
   }
-
+  }
   /* THIS FADES THE LED STRIP */
-  unsigned long currentTime = millis();
-  if (currentTime - previousTime >=  setspeed) {
-    /* Event code */
-    fadeToBlackBy(tom1strip, TOM1LEDS, 1);
-    fadeToBlackBy(tom2strip, TOM2LEDS, 1);
-    fadeToBlackBy(tom3strip, TOM3LEDS, 1);
-    fadeToBlackBy(snarestrip, SNARELEDS, 1);
-    fadeToBlackBy(bassstrip, BASSLEDS, 1);
-    fadeToBlackBy(hihatstrip, HIHATLEDS, 1);
-    fadeToBlackBy(crashstrip, CRASHLEDS, 1);
-    fadeToBlackBy(ridestrip, RIDELEDS, 1);
-
-    controllers[0]->showLeds();
-    controllers[1]->showLeds();
-    controllers[2]->showLeds();
-    controllers[3]->showLeds();
-    controllers[4]->showLeds();
-    controllers[5]->showLeds();
-    controllers[6]->showLeds();
-    controllers[7]->showLeds();
-  }
-
-
- 
-  
+ EVERY_N_MILLISECONDS (5) {
+    if ((hihatBrightness) > (minBrightness)) {
+      hihatBrightness-(hihatFade);
+      FastLED[0].showLeds(hihatBrightness);
+    }
+    if ((snareBrightness) > (minBrightness)) {
+      snareBrightness-(snareFade);
+      FastLED[1].showLeds(snareBrightness);
+    }
+    if (bassBrightness > minBrightness) {
+      bassBrightness-(bassFade);
+      FastLED[2].showLeds(bassBrightness);
+    }
 }
