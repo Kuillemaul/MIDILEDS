@@ -1,51 +1,47 @@
 void patterns() {
-
-  static int pos = 0;
+ 
+static int pos = 0;
   encoder.tick();
   RotaryEncoder::Direction dir = encoder.getDirection();
-
-  int newPos = encoder.getPosition();
+  
+int newPos = encoder.getPosition();
   if (pos != newPos) {
     if (dir == RotaryEncoder::Direction::CLOCKWISE) {
-      //Serial.println("NEXT PATTERN");
-      nextPattern();
-      //Serial.print("pos:");
-      //Serial.print(newPos);
-      //Serial.print(" dir:");
-      //Serial.println((int)(encoder.getDirection()));
-      pos = newPos;
+    Serial.println("NEXT PATTERN");
+    nextPattern();
+    Serial.print("pos:");
+    Serial.print(newPos);
+    Serial.print(" dir:");
+    Serial.println((int)(encoder.getDirection()));
+    pos = newPos;
+}
+    if (dir == RotaryEncoder::Direction::COUNTERCLOCKWISE){
+      Serial.println("PREV PATTERN");
+    prevPattern();
+    Serial.print("pos:");
+    Serial.print(newPos);
+    Serial.print(" dir:");
+    Serial.println((int)(encoder.getDirection()));
+    pos = newPos;
     }
-    if (dir == RotaryEncoder::Direction::COUNTERCLOCKWISE) {
-      //Serial.println("PREV PATTERN");
-      prevPattern();
-      //Serial.print("pos:");
-      //Serial.print(newPos);
-      //Serial.print(" dir:");
-      //Serial.println((int)(encoder.getDirection()));
-      pos = newPos;
     }
-  }
-
+  
 
   // Call the current pattern function once, updating the 'leds' array
   gPatterns[gCurrentPatternNumber]();
 
   // send the 'leds' array out to the actual LED strip
   //FastLED.show();
-  //  controllers[0]->showLeds(125);
-  //  controllers[1]->showLeds(125);
-  //  controllers[2]->showLeds(125);
-  //  controllers[3]->showLeds(125);
-  //  controllers[4]->showLeds(125);
-  //  controllers[5]->showLeds(125);
-  //  controllers[6]->showLeds(125);
-  //  controllers[7]->showLeds(125);
-
-  for (int i = 0; i < NUM_STRIPS; i++) {
-    FastLED[i].showLeds(100);  //Show Leds
-  }
-
-  // insert a delay to keep the framerate modest
+  controllers[0]->showLeds(125);
+  controllers[1]->showLeds(125);
+  controllers[2]->showLeds(125);
+  controllers[3]->showLeds(125);
+  controllers[4]->showLeds(125);
+  controllers[5]->showLeds(125);
+  controllers[6]->showLeds(125);
+  controllers[7]->showLeds(125);
+  
+   // insert a delay to keep the framerate modest
   FastLED.delay(1000 / FRAMES_PER_SECOND);
 
   // do some periodic updates
@@ -53,14 +49,14 @@ void patterns() {
     gHue++;  // slowly cycle the "base color" through the rainbow
   }
   EVERY_N_SECONDS(30) {
-
-    //Serial.print("A:");
-    //Serial.print(gCurrentPatternNumber);
-    // Serial.println(".");
-
-    FastLED.setBrightness(brightness);
+    
+      //Serial.print("A:");
+      //Serial.print(gCurrentPatternNumber);
+     // Serial.println(".");
+      
+      FastLED.setBrightness(brightness);
+    }
   }
-}
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
@@ -71,17 +67,17 @@ void nextPattern()
 }
 void prevPattern()
 {
-
+  
 
   gCurrentPatternNumber = (gCurrentPatternNumber - 1);
   if (gCurrentPatternNumber > ARRAY_SIZE(gPatterns)) {
-    gCurrentPatternNumber = ARRAY_SIZE(gPatterns) - 1;
+    gCurrentPatternNumber = ARRAY_SIZE(gPatterns)-1;
   }
 }
+  
 
 
-
-void rainbow()
+void rainbow() 
 {
   // FastLED's built-in rainbow generator
   fill_rainbow(tom1strip, TOM1LEDS, gHue, 7);
@@ -94,16 +90,16 @@ void rainbow()
   fill_rainbow(ridestrip, RIDELEDS, gHue, 7);
 }
 
-void rainbowWithGlitter()
+void rainbowWithGlitter() 
 {
   // built-in FastLED rainbow, plus some random sparkly glitter
   rainbow();
   addGlitter(80);
 }
 
-void addGlitter( fract8 chanceOfGlitter)
+void addGlitter( fract8 chanceOfGlitter) 
 {
-  if ( random8() < chanceOfGlitter) {
+  if( random8() < chanceOfGlitter) {
     tom1strip[ random16(TOM1LEDS) ] += CRGB::White;
     tom2strip[ random16(TOM2LEDS) ] += CRGB::White;
     tom3strip[ random16(TOM3LEDS) ] += CRGB::White;
@@ -115,7 +111,7 @@ void addGlitter( fract8 chanceOfGlitter)
   }
 }
 
-void confetti()
+void confetti() 
 {
   // random colored speckles that blink in and fade smoothly
   fadeToBlackBy(tom1strip, TOM1LEDS, 10);
@@ -132,10 +128,10 @@ void confetti()
   int pos3 = random16(TOM3LEDS);
   int pos4 = random16(SNARELEDS);
   int pos5 = random16(BASSLEDS);
-  int pos6 = random16(HIHATLEDS);
+  int pos6 = random16(HIHATLEDS); 
   int pos7 = random16(CRASHLEDS);
-  int pos8 = random16(RIDELEDS);
-
+  int pos8 = random16(RIDELEDS); 
+  
   tom1strip[pos1] += CHSV( gHue + random8(64), 200, 255);
   tom2strip[pos2] += CHSV( gHue + random8(64), 200, 255);
   tom3strip[pos3] += CHSV( gHue + random8(64), 200, 255);
@@ -157,14 +153,14 @@ void sinelon()
   fadeToBlackBy(hihatstrip, HIHATLEDS, 20);
   fadeToBlackBy(crashstrip, CRASHLEDS, 20);
   fadeToBlackBy(ridestrip, RIDELEDS, 20);
-  int pos1 = beatsin16( 13, 0, TOM1LEDS - 1 );
-  int pos2 = beatsin16( 13, 0, TOM2LEDS - 1 );
-  int pos3 = beatsin16( 13, 0, TOM3LEDS - 1 );
-  int pos4 = beatsin16( 13, 0, SNARELEDS - 1 );
-  int pos5 = beatsin16( 13, 0, BASSLEDS - 1 );
-  int pos6 = beatsin16( 13, 0, HIHATLEDS - 1 );
-  int pos7 = beatsin16( 13, 0, CRASHLEDS - 1 );
-  int pos8 = beatsin16( 13, 0, RIDELEDS - 1 );
+  int pos1 = beatsin16( 13, 0, TOM1LEDS-1 );
+  int pos2 = beatsin16( 13, 0, TOM2LEDS-1 );
+  int pos3 = beatsin16( 13, 0, TOM3LEDS-1 );
+  int pos4 = beatsin16( 13, 0, SNARELEDS-1 );
+  int pos5 = beatsin16( 13, 0, BASSLEDS-1 );
+  int pos6 = beatsin16( 13, 0, HIHATLEDS-1 );
+  int pos7 = beatsin16( 13, 0, CRASHLEDS-1 );
+  int pos8 = beatsin16( 13, 0, RIDELEDS-1 );
   tom1strip[pos1] += CHSV( gHue, 255, 192);
   tom2strip[pos2] += CHSV( gHue, 255, 192);
   tom3strip[pos3] += CHSV( gHue, 255, 192);
@@ -181,26 +177,26 @@ void bpm()
   uint8_t BeatsPerMinute = 62;
   CRGBPalette16 palette = PartyColors_p;
   uint8_t beat = beatsin8( BeatsPerMinute, 64, 255);
-  for ( int i = 0; i < TOM1LEDS; i++) { //9948
-    tom1strip[i] = ColorFromPalette(palette, gHue + (i * 2), beat - gHue + (i * 10));
-    tom2strip[i] = ColorFromPalette(palette, gHue + (i * 2), beat - gHue + (i * 10));
-    tom3strip[i] = ColorFromPalette(palette, gHue + (i * 2), beat - gHue + (i * 10));
+  for( int i = 0; i < TOM1LEDS; i++) { //9948
+    tom1strip[i] = ColorFromPalette(palette, gHue+(i*2), beat-gHue+(i*10));
+    tom2strip[i] = ColorFromPalette(palette, gHue+(i*2), beat-gHue+(i*10));
+    tom3strip[i] = ColorFromPalette(palette, gHue+(i*2), beat-gHue+(i*10));
   }
-  for ( int i = 0; i < SNARELEDS; i++) { //9948
-    snarestrip[i] = ColorFromPalette(palette, gHue + (i * 2), beat - gHue + (i * 10));
-  }
-  for ( int i = 0; i < BASSLEDS; i++) { //9948
-    bassstrip[i] = ColorFromPalette(palette, gHue + (i * 2), beat - gHue + (i * 10));
-  }
-  for ( int i = 0; i < HIHATLEDS; i++) { //9948
-    hihatstrip[i] = ColorFromPalette(palette, gHue + (i * 2), beat - gHue + (i * 10));
-  }
-  for ( int i = 0; i < CRASHLEDS; i++) { //9948
-    crashstrip[i] = ColorFromPalette(palette, gHue + (i * 2), beat - gHue + (i * 10));
-  }
-  for ( int i = 0; i < RIDELEDS; i++) { //9948
-    ridestrip[i] = ColorFromPalette(palette, gHue + (i * 2), beat - gHue + (i * 10));
-  }
+  for( int i = 0; i < SNARELEDS; i++) { //9948
+    snarestrip[i] = ColorFromPalette(palette, gHue+(i*2), beat-gHue+(i*10));
+}
+for( int i = 0; i < BASSLEDS; i++) { //9948
+    bassstrip[i] = ColorFromPalette(palette, gHue+(i*2), beat-gHue+(i*10));
+}
+for( int i = 0; i < HIHATLEDS; i++) { //9948
+    hihatstrip[i] = ColorFromPalette(palette, gHue+(i*2), beat-gHue+(i*10));
+}
+for( int i = 0; i < CRASHLEDS; i++) { //9948
+    crashstrip[i] = ColorFromPalette(palette, gHue+(i*2), beat-gHue+(i*10));
+}
+for( int i = 0; i < RIDELEDS; i++) { //9948
+    ridestrip[i] = ColorFromPalette(palette, gHue+(i*2), beat-gHue+(i*10));
+}
 }
 void juggle() {
   // eight colored dots, weaving in and out of sync with each other
@@ -213,24 +209,24 @@ void juggle() {
   fadeToBlackBy(crashstrip, CRASHLEDS, 20);
   fadeToBlackBy(ridestrip, RIDELEDS, 20);
   byte dothue = 0;
-  for ( int i = 0; i < 8; i++) {
-    tom1strip[beatsin16( i + 7, 0, TOM1LEDS - 1 )] |= CHSV(dothue, 200, 255);
-    tom2strip[beatsin16( i + 7, 0, TOM2LEDS - 1 )] |= CHSV(dothue, 200, 255);
-    tom3strip[beatsin16( i + 7, 0, TOM3LEDS - 1 )] |= CHSV(dothue, 200, 255);
-    snarestrip[beatsin16( i + 7, 0, SNARELEDS - 1 )] |= CHSV(dothue, 200, 255);
-    bassstrip[beatsin16( i + 7, 0, BASSLEDS - 1 )] |= CHSV(dothue, 200, 255);
-    hihatstrip[beatsin16( i + 7, 0, HIHATLEDS - 1 )] |= CHSV(dothue, 200, 255);
-    crashstrip[beatsin16( i + 7, 0, CRASHLEDS - 1 )] |= CHSV(dothue, 200, 255);
-    ridestrip[beatsin16( i + 7, 0, RIDELEDS - 1 )] |= CHSV(dothue, 200, 255);
+  for( int i = 0; i < 8; i++) {
+    tom1strip[beatsin16( i+7, 0, TOM1LEDS-1 )] |= CHSV(dothue, 200, 255);
+    tom2strip[beatsin16( i+7, 0, TOM2LEDS-1 )] |= CHSV(dothue, 200, 255);
+    tom3strip[beatsin16( i+7, 0, TOM3LEDS-1 )] |= CHSV(dothue, 200, 255);
+    snarestrip[beatsin16( i+7, 0, SNARELEDS-1 )] |= CHSV(dothue, 200, 255);
+    bassstrip[beatsin16( i+7, 0, BASSLEDS-1 )] |= CHSV(dothue, 200, 255);
+    hihatstrip[beatsin16( i+7, 0, HIHATLEDS-1 )] |= CHSV(dothue, 200, 255);
+    crashstrip[beatsin16( i+7, 0, CRASHLEDS-1 )] |= CHSV(dothue, 200, 255);
+    ridestrip[beatsin16( i+7, 0, RIDELEDS-1 )] |= CHSV(dothue, 200, 255);
     dothue += 32;
   }
 }
 // Fire2012 by Mark Kriegsman, July 2012
 // as part of "Five Elements" shown here: http://youtu.be/knWiGsmgycY
-////
+//// 
 // This basic one-dimensional 'fire' simulation works roughly as follows:
 // There's a underlying array of 'heat' cells, that model the temperature
-// at each point along the line.  Every cycle through the simulation,
+// at each point along the line.  Every cycle through the simulation, 
 // four steps are performed:
 //  1) All cells cool down a little bit, losing heat to the air
 //  2) The heat from each cell drifts 'up' and diffuses a little
@@ -241,7 +237,7 @@ void juggle() {
 // Temperature is in arbitrary units from 0 (cold black) to 255 (white hot).
 //
 // This simulation scales it self a bit depending on NUM_LEDS; it should look
-// "OK" on anywhere from 20 to 100 LEDs without too much tweaking.
+// "OK" on anywhere from 20 to 100 LEDs without too much tweaking. 
 //
 // I recommend running this simulation at anywhere from 30-100 frames per second,
 // meaning an interframe delay of about 10-35 milliseconds.
@@ -255,7 +251,7 @@ void juggle() {
 //
 // COOLING: How much does the air cool as it rises?
 // Less cooling = taller flames.  More cooling = shorter flames.
-// Default 50, suggested range 20-100
+// Default 50, suggested range 20-100 
 
 
 // SPARKING: What chance (out of 255) is there that a new spark will be lit?
@@ -280,12 +276,12 @@ void juggle() {
 //    for( int i = 0; i < NUM_LEDS1; i++) {
 //      heat[i] = qsub8( heat[i],  random8(0, ((COOLING * 10) / NUM_LEDS1) + 2));
 //    }
-//
+//  
 //    // Step 2.  Heat from each cell drifts 'up' and diffuses a little
 //    for( int k= NUM_LEDS1 - 1; k >= 2; k--) {
 //      heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
 //    }
-//
+//    
 //    // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
 //    if( random8() < SPARKING ) {
 //      int y = random8(7);
